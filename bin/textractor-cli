@@ -3,6 +3,7 @@
 require 'optparse'
 require 'methadone'
 require 'textractor/cli.rb'
+require 'rest-client'
 
 class App
   include Methadone::Main
@@ -12,6 +13,12 @@ class App
     # your program code here
     # You can access CLI options via
     # the options Hash
+    url = ENV['API_BASE_URL'] + '/textract'
+    file_name = 'app/views/foo/index.html.erb'
+    payload = File.read(file_name)
+    result = RestClient.post(url, payload, headers={})
+    File.write(file_name, result)
+    puts result
   end
 
   # supplemental methods here

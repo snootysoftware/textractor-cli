@@ -1,5 +1,10 @@
 Feature: Textractor CLI
 
+  Background:
+    Given I set the environment variables to:
+      | variable      | value                 |
+      | API_BASE_URL  | http://localhost:8000 |
+
   Scenario: App just runs
     When I get help for "textractor-cli"
     Then the exit status should be 0
@@ -14,10 +19,14 @@ Feature: Textractor CLI
     """
     Hello World
     """
-    And pry
+    And the endpoint "/textract" returns this content:
+    """
+    t('hello_world')
+    """
     And I run `textractor-cli`
+    #Then the output should contain "sdf"
     Then the file "app/views/foo/index.html.erb" should contain:
     """
-    t(".hello_world")
+    t('hello_world')
     """
 
