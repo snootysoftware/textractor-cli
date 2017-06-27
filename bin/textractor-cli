@@ -11,23 +11,30 @@ class App
   include Methadone::CLILogging
 
   main do # Add args you want: |like,so|
-    # Given:
-    # app/views/payments/show.html.erb
-    # en:
-    #   payments:
-    #         show:
-    #           title: foo
     url = ENV['API_BASE_URL'] + '/textract'
-    file1 = 'app/views/foo/index.html.erb'
-    file2 = 'app/views/foo/show.html.erb'
-    payload = {
-      file1 => File.read(file1),
-      file2 => File.read(file2)
-    }
-    result = RestClient.post(url, payload.to_json, headers={})
-    JSON.parse(result).each do |k,v|
-      File.write(k, v["result"])
+    payload = {}
+    Dir['**/*.erb'].each do |f|
+      payload[f] = File.read(f)
     end
+    result = RestClient.post(url, payload.to_json, headers={})
+
+    locale_file = 'config/locales/en.yml' 
+    locale = YAML.load_file(locale_file)
+    locale['en'] ||= {}
+    
+    JSON.parse(result).each do |k,v|
+      raise "unexpected path \"#{k} in result!" unless payload.keys.include?(k)
+      File.write(k, v["result"])
+      key = k.sub('app/views/','').sub(/(\.html)?\.erb/,'').split('/')
+
+      tmp = locale['en']
+      key.each do |part|
+        tmp[part] ||= {}
+        tmp = tmp[part]
+      end
+      v["locale"].each {|kk,vv| tmp[kk] = vv }
+    end
+    File.write(locale_file, YAML.dump(locale))
   end
 
   # supplemental methods here
