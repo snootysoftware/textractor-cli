@@ -4,21 +4,30 @@ require 'optparse'
 require 'methadone'
 require 'textractor/cli.rb'
 require 'rest-client'
+require 'json'
 
 class App
   include Methadone::Main
   include Methadone::CLILogging
 
   main do # Add args you want: |like,so|
-    # your program code here
-    # You can access CLI options via
-    # the options Hash
+    # Given:
+    # app/views/payments/show.html.erb
+    # en:
+    #   payments:
+    #         show:
+    #           title: foo
     url = ENV['API_BASE_URL'] + '/textract'
-    file_name = 'app/views/foo/index.html.erb'
-    payload = File.read(file_name)
-    result = RestClient.post(url, payload, headers={})
-    File.write(file_name, result)
-    puts result
+    file1 = 'app/views/foo/index.html.erb'
+    file2 = 'app/views/foo/show.html.erb'
+    payload = {
+      file1 => File.read(file1),
+      file2 => File.read(file2)
+    }
+    result = RestClient.post(url, payload.to_json, headers={})
+    JSON.parse(result).each do |k,v|
+      File.write(k, v["result"])
+    end
   end
 
   # supplemental methods here

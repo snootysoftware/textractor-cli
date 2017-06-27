@@ -19,14 +19,40 @@ Feature: Textractor CLI
     """
     Hello World
     """
-    And the endpoint "/textract" returns this content:
+    And a file named "app/views/foo/show.html.erb" with:
     """
-    t('hello_world')
+    Hello Lucas
+    """
+    And the endpoint "/textract" returns this content:
+    """json
+    {
+      "app/views/foo/index.html.erb": { 
+        "result": "t('hello_world')", 
+        "locale": { "hello_world": "Hello World" } 
+      },
+      "app/views/foo/show.html.erb": { 
+        "result": "t('hello_lucas')", 
+        "locale": { "hello_lucas": "Hello Lucas" }
+      }
+    }
     """
     And I run `textractor-cli`
+    And the stderr should not contain anything
+    Then the following request body should have been sent:
+    """json
+    {
+      "app/views/foo/index.html.erb": "Hello World",
+      "app/views/foo/show.html.erb": "Hello Lucas"
+    }
+    """
     #Then the output should contain "sdf"
     Then the file "app/views/foo/index.html.erb" should contain:
     """
     t('hello_world')
     """
+    Then the file "app/views/foo/show.html.erb" should contain:
+    """
+    t('hello_lucas')
+    """
+
 

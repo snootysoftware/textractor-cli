@@ -52,6 +52,9 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
+    pry-remote (0.1.8)
+      pry (~> 0.9)
+      slop (~> 3.0)
     rake (10.5.0)
     rdoc (5.1.0)
     rest-client (2.0.2)
@@ -77,6 +80,7 @@ DEPENDENCIES
   aruba
   bundler (~> 1.14)
   pry
+  pry-remote
   rake (~> 10.0)
   rdoc
   test-unit
