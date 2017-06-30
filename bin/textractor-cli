@@ -13,19 +13,23 @@ class App
   main do # Add args you want: |like,so|
     url = ENV['API_BASE_URL'] + '/textract'
     payload = {}
-    Dir['**/*.erb'].each do |f|
+    glob = File.join(options['templates-path'], options['templates-pattern'])
+
+    Dir[glob].each do |f|
       payload[f] = File.read(f)
     end
     result = RestClient.post(url, payload.to_json, headers={})
 
-    locale_file = 'config/locales/en.yml' 
+    locale_file = options['locale-path']
     locale = YAML.load_file(locale_file)
     locale['en'] ||= {}
     
     JSON.parse(result).each do |k,v|
       raise "unexpected path \"#{k} in result!" unless payload.keys.include?(k)
       File.write(k, v["result"])
-      key = k.sub('app/views/','').sub(/(\.html)?\.erb/,'').split('/')
+      key = k.sub(options['templates-path'],'')
+             .sub(/^\//,'')
+             .sub(/(\.html)?\.erb/,'').split('/')
 
       tmp = locale['en']
       key.each do |part|
@@ -57,6 +61,15 @@ class App
   #
   # # Make an argument optional
   # arg :optional_arg, :optional
+
+  options['templates-pattern'] = "**/*.html.erb"
+  on("--templates-pattern PATTERN", "Dir.glob() pattern used to match templates filenames")
+
+  options['templates-path'] = "app/views"
+  on("--templates-path PATH", "Template path")
+
+  options['locale-path'] = "config/locales/en.yml"
+  on("--locale-path PATH", "Path of target YAML locale file")
 
   version Textractor::Cli::VERSION
 

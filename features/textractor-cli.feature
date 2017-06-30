@@ -11,7 +11,7 @@ Feature: Textractor CLI
     And the banner should be present
     And the banner should document that this app takes options
     And the following options should be documented:
-      |--version|
+      |--version| --template-pattern | --locale-path |
     And the banner should document that this app takes no arguments
 
   Scenario: Simple case
@@ -68,6 +68,48 @@ Feature: Textractor CLI
           hello_world: Hello World
         show:
           hello_foo: Hello Foo
+    """
+
+
+
+  Scenario: Override default locale and template pattern settings
+    Given a file named "views/index.erb" with:
+    """
+    Hello World
+    """
+    And a file named "locales/en.yml" with:
+    """
+    ---
+      en:
+    """
+    And the endpoint "/textract" returns this content:
+    """json
+    {
+      "views/index.erb": { 
+        "result": "t('hello_world')", 
+        "locale": { "hello_world": "Hello World" } 
+      }
+    }
+    """
+    And I run `textractor-cli --templates-path views --template-pattern **/*.erb --locale locales/en.yml`
+    #Then the output should contain "sdf"
+    And the stderr should not contain anything
+    Then the following request body should have been sent:
+    """json
+    {
+      "views/index.erb": "Hello World"
+    }
+    """
+    Then the file "views/index.erb" should contain:
+    """
+    t('hello_world')
+    """
+    Then the file "locales/en.yml" should contain:
+    """yaml
+    ---
+    en:
+      index:
+        hello_world: Hello World
     """
 
 
