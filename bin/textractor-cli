@@ -16,8 +16,12 @@ class App
     glob = File.join(options['templates-path'], options['templates-pattern'])
 
     Dir[glob].each do |f|
-      payload[f] = File.read(f)
+      payload[f] = {content: File.read(f)}
     end
+
+    payload = {templates: payload}
+    payload[:absolute_keys] = true if options['absolute-keys']
+
     result = RestClient.post(url, payload.to_json, headers={})
 
     locale_file = options['locale-path']
@@ -25,7 +29,7 @@ class App
     locale['en'] ||= {}
     
     JSON.parse(result).each do |k,v|
-      raise "unexpected path \"#{k} in result!" unless payload.keys.include?(k)
+      raise "unexpected path \"#{k} in result!" unless payload[:templates].keys.include?(k)
       File.write(k, v["result"])
       key = k.sub(options['templates-path'],'')
              .sub(/^\//,'')
@@ -70,6 +74,8 @@ class App
 
   options['locale-path'] = "config/locales/en.yml"
   on("--locale-path PATH", "Path of target YAML locale file")
+
+  on("--absolute-keys", "Generate `t('posts.index.title')` rather than `t('.title')`)")
 
   version Textractor::Cli::VERSION
 
