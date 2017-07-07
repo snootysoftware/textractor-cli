@@ -22,7 +22,15 @@ class App
     payload = {templates: payload}
     payload[:absolute_keys] = true if options['absolute-keys']
 
-    result = RestClient.post(url, payload.to_json, headers={})
+    key = options['license-key'] || ENV['TEXTRACTOR_API_KEY']
+    unless key
+      exit_now!(1,"No license key found. Use flag, ~/.textractor.rc or environment variable.")
+    end
+
+    headers = {
+      'X-Auth-Token' => options['license-key']
+    }
+    result = RestClient.post(url, payload.to_json, headers) 
 
     locale_file = options['locale-path']
     locale = YAML.load_file(locale_file)
@@ -76,6 +84,10 @@ class App
   on("--locale-path PATH", "Path of target YAML locale file")
 
   on("--absolute-keys", "Generate `t('posts.index.title')` rather than `t('.title')`)")
+
+  on("--license-key KEY", "Get your key at https://textractor.snootysoftware.com")
+
+  defaults_from_config_file '.textractor.rc'
 
   version Textractor::Cli::VERSION
 

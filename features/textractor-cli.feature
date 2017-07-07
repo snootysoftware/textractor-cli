@@ -4,6 +4,12 @@ Feature: Textractor CLI
     Given I set the environment variables to:
       | variable      | value                 |
       | API_BASE_URL  | http://localhost:8000 |
+    And a file named ".textractor.rc" with:
+    """
+    ---
+    license-key: foo
+    """
+
 
   Scenario: App just runs
     When I get help for "textractor-cli"

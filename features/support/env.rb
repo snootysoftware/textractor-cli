@@ -21,6 +21,10 @@ After do
 	RubyMock.clear
 end
 
+Aruba.configure do |config|
+  config.home_directory = '.'
+end
+
 class RubyMock
   class << self; attr_accessor :resources end
   class << self; attr_accessor :requests end
