@@ -27,6 +27,10 @@ Feature: Textractor CLI
     """
     ---
       en:
+        bar: foo
+        foo:
+          index:
+            foo: Foo
     """
     And the endpoint "/textract" returns this content:
     """json
@@ -63,8 +67,10 @@ Feature: Textractor CLI
     """yaml
     ---
     en:
+      bar: foo
       foo:
         index:
+          foo: Foo
           hello_world: Hello World
         show:
           hello_foo: Hello Foo
