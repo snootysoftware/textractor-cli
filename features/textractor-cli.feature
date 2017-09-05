@@ -151,7 +151,7 @@ Feature: Textractor CLI
     """
     And I run `textractor-cli --templates-path views --template-pattern **/*.erb --locale locales/en.yml`
     #Then the output should contain "sdf"
-    And the stderr should not contain anything
+    And the stderr should not contain anything 
     Then the following request body should have been sent:
     """json
     {
