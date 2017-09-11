@@ -17,7 +17,7 @@ Feature: Textractor CLI
     And the banner should be present
     And the banner should document that this app takes options
     And the following options should be documented:
-      |--version| --template-pattern | --locale-path |
+      |--version| --template-pattern | --locale-path | --dry-run |
     And the banner should document that this app takes no arguments
 
   Scenario: Simple case
@@ -83,6 +83,69 @@ Feature: Textractor CLI
         show:
           hello_foo: Hello Foo
     """
+    Scenario: Dry run
+      Given a file named "app/views/foo/index.html.erb" with:
+      """
+      Hello World
+      """
+      And a file named "app/views/foo/show.html.erb" with:
+      """
+      Hello Foo
+      """
+      And a file named "config/locales/en.yml" with:
+      """
+      ---
+        en:
+          bar: foo
+          foo:
+            index:
+              foo: Foo
+      """
+      And the endpoint "/quote" returns this content:
+      """json
+      {
+        "textract_calls": 2,
+        "current_credits": 1000,
+        "credits_cost": 2,
+        "credits_after_textract": 998
+      }
+      """
+      And I run `textractor-cli --dry-run`
+      Then the output should contain:
+      """
+      Amount of templates to be processed: 2
+      Amount of t() calls: 2
+      Amount of credits this will cost: 2
+      Current credits: 1000
+      Credits after textract: 998
+      """
+      And the stderr should not contain anything
+      Then the following request body should have been sent:
+      """json
+      {
+        "templates": {
+          "app/views/foo/index.html.erb": {"content": "Hello World"},
+          "app/views/foo/show.html.erb": {"content": "Hello Foo"}
+        }
+      }
+      """
+      Then the file "app/views/foo/index.html.erb" should contain:
+      """
+      Hello World
+      """
+      Then the file "app/views/foo/show.html.erb" should contain:
+      """
+      Hello Foo
+      """
+      Then the file "config/locales/en.yml" should contain:
+      """yaml
+      ---
+        en:
+          bar: foo
+          foo:
+            index:
+              foo: Foo
+      """
 
   Scenario: use absolute translation keys
     Given a file named "app/views/foo/index.html.erb" with:

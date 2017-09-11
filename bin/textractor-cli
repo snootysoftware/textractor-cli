@@ -5,13 +5,15 @@ require 'methadone'
 require 'textractor/cli.rb'
 require 'rest-client'
 require 'json'
+require 'pry'
 
 class App
   include Methadone::Main
   include Methadone::CLILogging
 
   main do # Add args you want: |like,so|
-    url = ENV['API_BASE_URL'] + '/textract'
+    url = ENV['API_BASE_URL']
+    url += options['dry-run'] ? "/quote" : '/textract'
     payload = {}
     glob = File.join(options['templates-path'], options['templates-pattern'])
 
@@ -31,26 +33,35 @@ class App
       'X-Auth-Token' => options['license-key']
     }
     result = RestClient.post(url, payload.to_json, headers) 
-
-    locale_file = options['locale-path']
-    locale = YAML.load_file(locale_file)
-    locale['en'] ||= {}
     
-    JSON.parse(result).each do |k,v|
-      raise "unexpected path \"#{k} in result!" unless payload[:templates].keys.include?(k)
-      File.write(k, v["result"])
-      key = k.sub(options['templates-path'],'')
-             .sub(/^\//,'')
-             .sub(/(\.html)?\.erb/,'').split('/')
-
-      tmp = locale['en']
-      key.each do |part|
-        tmp[part] ||= {}
-        tmp = tmp[part]
+    if options['dry-run']
+      result = JSON.parse(result)
+      puts "Amount of templates to be processed: #{Dir[glob].size}"
+      puts "Amount of t() calls: #{result["textract_calls"]}"
+      puts "Amount of credits this will cost: #{result["credits_cost"]}"
+      puts "Current credits: #{result["current_credits"]}"
+      puts "Credits after textract: #{result["credits_after_textract"]}"
+    else
+      locale_file = options['locale-path']
+      locale = YAML.load_file(locale_file)
+      locale['en'] ||= {}
+      
+      JSON.parse(result).each do |k,v|
+        raise "unexpected path \"#{k} in result!" unless payload[:templates].keys.include?(k)
+        File.write(k, v["result"])
+        key = k.sub(options['templates-path'],'')
+               .sub(/^\//,'')
+               .sub(/(\.html)?\.erb/,'').split('/')
+  
+        tmp = locale['en']
+        key.each do |part|
+          tmp[part] ||= {}
+          tmp = tmp[part]
+        end
+        v["locale"].each {|kk,vv| tmp[kk] = vv }
       end
-      v["locale"].each {|kk,vv| tmp[kk] = vv }
+      File.write(locale_file, YAML.dump(locale))
     end
-    File.write(locale_file, YAML.dump(locale))
   end
 
   # supplemental methods here
@@ -84,6 +95,8 @@ class App
   on("--locale-path PATH", "Path of target YAML locale file")
 
   on("--absolute-keys", "Generate `t('posts.index.title')` rather than `t('.title')`)")
+
+  on("--dry-run", "Get statistics and cost estimate from server without processing")
 
   on("--license-key KEY", "Get your key at https://textractor.snootysoftware.com")
 
