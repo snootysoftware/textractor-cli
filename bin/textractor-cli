@@ -29,6 +29,7 @@ class App
       exit_now!(1,"No license key found. Use flag, ~/.textractor.rc or environment variable.")
     end
 
+    puts "Processing..."
     headers = {
       'X-Auth-Token' => options['license-key']
     }
@@ -46,9 +47,11 @@ class App
       locale = YAML.load_file(locale_file)
       locale['en'] ||= {}
       
+      total_calls = 0
+      total_errors = 0
       JSON.parse(result).each do |k,v|
         raise "unexpected path \"#{k} in result!" unless payload[:templates].keys.include?(k)
-        File.write(k, v["result"])
+        File.write(k, v["result"]) unless v["error"]
         key = k.sub(options['templates-path'],'')
                .sub(/^\//,'')
                .sub(/(\.html)?\.erb/,'').split('/')
@@ -58,9 +61,19 @@ class App
           tmp[part] ||= {}
           tmp = tmp[part]
         end
-        v["locale"].each {|kk,vv| tmp[kk] = vv }
+        (v["locale"] || {}).each {|kk,vv| tmp[kk] = vv }
+        if v["error"]
+          puts "\n Error processing \"#{k}\": #{v["error"]}"
+          total_errors += 1
+        else
+          total_calls += v["textract_calls"]
+        end
       end
       File.write(locale_file, YAML.dump(locale))
+      puts "\n"
+      puts "Processed #{Dir[glob].size} templates in total."
+      puts "Total errors: #{total_errors}"
+      puts "Total amount of string literals prepared for translation: #{total_calls}"
     end
   end
 

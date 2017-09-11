@@ -42,17 +42,26 @@ Feature: Textractor CLI
     """json
     {
       "app/views/foo/index.html.erb": { 
-        "result": "t('.hello_world')", 
+        "result": "t('.hello_world')",
+        "textract_calls": 1, 
         "locale": { "hello_world": "Hello World" } 
       },
       "app/views/foo/show.html.erb": { 
-        "result": "t('.hello_foo')", 
+        "result": "t('.hello_foo')",
+        "textract_calls": 1, 
         "locale": { "hello_foo": "Hello Foo" }
       }
     }
     """
     And I run `textractor-cli`
-    #Then the output should contain "sdf"
+    Then the output should contain:
+    """
+    Processing...
+    
+    Processed 2 templates in total.
+    Total errors: 0
+    Total amount of string literals prepared for translation: 2
+    """
     And the stderr should not contain anything
     Then the following request body should have been sent:
     """json
@@ -80,6 +89,77 @@ Feature: Textractor CLI
         index:
           foo: Foo
           hello_world: Hello World
+        show:
+          hello_foo: Hello Foo
+    """
+    Scenario: Display errors
+    Given a file named "app/views/foo/index.html.erb" with:
+    """
+    <h1><h1><h1><h1>Hello World
+    """
+    And a file named "app/views/foo/show.html.erb" with:
+    """
+    Hello Foo
+    """
+    And a file named "config/locales/en.yml" with:
+    """
+    ---
+      en:
+        bar: foo
+        foo:
+          index:
+            foo: Foo
+    """
+    And the endpoint "/textract" returns this content:
+    """json
+    {
+      "app/views/foo/index.html.erb": { 
+       "error": "Oops, unable to infer a valid HTML5 structure. Please contact us at info@snootysoftware.com" 
+      },
+      "app/views/foo/show.html.erb": { 
+        "result": "t('.hello_foo')", 
+        "textract_calls": 1, 
+        "locale": { "hello_foo": "Hello Foo" }
+      }
+    }
+    """
+    And I run `textractor-cli`
+    Then the output should contain:
+    """
+    Processing...
+    
+     Error processing "app/views/foo/index.html.erb": Oops, unable to infer a valid HTML5 structure. Please contact us at info@snootysoftware.com
+    
+    Processed 2 templates in total.
+    Total errors: 1
+    Total amount of string literals prepared for translation: 1
+    """
+    And the stderr should not contain anything
+    Then the following request body should have been sent:
+    """json
+    {
+      "templates": {
+        "app/views/foo/index.html.erb": {"content": "<h1><h1><h1><h1>Hello World"},
+        "app/views/foo/show.html.erb": {"content": "Hello Foo"}
+      }
+    }
+    """
+    Then the file "app/views/foo/index.html.erb" should contain:
+    """
+    <h1><h1><h1><h1>Hello World
+    """
+    Then the file "app/views/foo/show.html.erb" should contain:
+    """
+    t('.hello_foo')
+    """
+    Then the file "config/locales/en.yml" should contain:
+    """yaml
+    ---
+    en:
+      bar: foo
+      foo:
+        index:
+          foo: Foo
         show:
           hello_foo: Hello Foo
     """
@@ -162,6 +242,7 @@ Feature: Textractor CLI
     {
       "app/views/foo/index.html.erb": { 
         "result": "t('foo.index.hello_world')", 
+        "textract_calls": 1, 
         "locale": { "hello_world": "Hello World" } 
       }
     }
@@ -207,13 +288,14 @@ Feature: Textractor CLI
     """json
     {
       "views/index.erb": { 
-        "result": "t('.hello_world')", 
+        "result": "t('.hello_world')",
+        "textract_calls": 1, 
         "locale": { "hello_world": "Hello World" } 
       }
     }
     """
     And I run `textractor-cli --templates-path views --template-pattern **/*.erb --locale locales/en.yml`
-    #Then the output should contain "sdf"
+    # Then the output should contain "sdf"
     And the stderr should not contain anything 
     Then the following request body should have been sent:
     """json
