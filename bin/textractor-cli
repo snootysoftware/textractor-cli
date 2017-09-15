@@ -10,7 +10,7 @@ class App
   include Methadone::Main
   include Methadone::CLILogging
 
-  main do # Add args you want: |like,so|
+  main do
     locale_file = options['locale-path']
     exit_now!(1, "Error: could not find a locale file at: #{locale_file}") unless File.exist?(locale_file)
     
@@ -28,7 +28,7 @@ class App
 
     key = options['license-key'] || ENV['TEXTRACTOR_API_KEY']
     unless key
-      exit_now!(1,"No license key found. Use flag, ~/.textractor.rc or environment variable.")
+      exit_now!(1,"No license key found. Use --licence-key flag, ~/.textractor.rc or TEXTRACTOR_API_KEY environment variable.")
     end
 
     puts "Processing..."
@@ -77,27 +77,6 @@ class App
       puts "Total amount of string literals prepared for translation: #{total_calls}"
     end
   end
-
-  # supplemental methods here
-
-  # Declare command-line interface here
-
-  # description "one line description of your app"
-  #
-  # Accept flags via:
-  # on("--flag VAL","Some flag")
-  # options[flag] will contain VAL
-  #
-  # Specify switches via:
-  # on("--[no-]switch","Some switch")
-  #
-  # Or, just call OptionParser methods on opts
-  #
-  # Require an argument
-  # arg :some_arg 
-  #
-  # # Make an argument optional
-  # arg :optional_arg, :optional
 
   options['templates-pattern'] = "**/*.html.erb"
   on("--templates-pattern PATTERN", "Dir.glob() pattern used to match templates filenames")
