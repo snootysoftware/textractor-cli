@@ -38,7 +38,7 @@ class App
     result = RestClient.post(url, payload.to_json, headers)
 
     if options['dry-run']
-      result = JSON.parse(result)
+      result = JSON.parse(result.body)
       puts "Amount of templates to be processed: #{Dir[glob].size}"
       puts "Amount of t() calls: #{result["textract_calls"]}"
       puts "Amount of credits this will cost: #{result["credits_cost"]}"
@@ -50,7 +50,7 @@ class App
 
       total_calls = 0
       total_errors = 0
-      JSON.parse(result).each do |k,v|
+      JSON.parse(result.body).each do |k,v|
         raise "unexpected path \"#{k} in result!" unless payload[:templates].keys.include?(k)
         File.write(k, v["result"]) unless v["error"]
         key = k.sub(options['templates-path'],'')
