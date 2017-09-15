@@ -12,6 +12,9 @@ class App
   include Methadone::CLILogging
 
   main do # Add args you want: |like,so|
+    locale_file = options['locale-path']
+    exit_now!(1, "Error: could not find a locale file at: #{locale_file}") unless File.exist?(locale_file)
+    
     url = ENV['API_BASE_URL']
     url += options['dry-run'] ? "/quote" : '/textract'
     payload = {}
@@ -43,7 +46,6 @@ class App
       puts "Current credits: #{result["current_credits"]}"
       puts "Credits after textract: #{result["credits_after_textract"]}"
     else
-      locale_file = options['locale-path']
       locale = YAML.load_file(locale_file)
       locale['en'] ||= {}
       
