@@ -14,7 +14,7 @@ class App
     locale_file = options['locale-path']
     exit_now!(1, "Error: could not find a locale file at: #{locale_file}") unless File.exist?(locale_file)
     
-    url = ENV['API_BASE_URL']
+    url = ENV['API_BASE_URL'] || "https://textractor.snootysoftware.com"
     url += options['dry-run'] ? "/quote" : '/textract'
     payload = {}
     glob = File.join(options['templates-path'], options['templates-pattern'])
