@@ -13,7 +13,7 @@ class App
   main do
     locale_file = options['locale-path']
     exit_now!(1, "Error: could not find a locale file at: #{locale_file}") unless File.exist?(locale_file)
-    
+
     url = ENV['API_BASE_URL'] || "https://textractor.snootysoftware.com"
     url += options['dry-run'] ? "/quote" : '/textract'
     payload = {}
@@ -28,15 +28,15 @@ class App
 
     key = options['license-key'] || ENV['TEXTRACTOR_API_KEY']
     unless key
-      exit_now!(1,"No license key found. Use --licence-key flag, ~/.textractor.rc or TEXTRACTOR_API_KEY environment variable.")
+      exit_now!(1,"No license key found. Use --licence-key flag, ~/.textractor.rc or TEXTRACTOR_API_KEY environment variable. Visit https://textractor.snootysoftware.com to order one.")
     end
 
     puts "Processing..."
     headers = {
       'X-Auth-Token' => options['license-key']
     }
-    result = RestClient.post(url, payload.to_json, headers) 
-    
+    result = RestClient.post(url, payload.to_json, headers)
+
     if options['dry-run']
       result = JSON.parse(result)
       puts "Amount of templates to be processed: #{Dir[glob].size}"
@@ -47,7 +47,7 @@ class App
     else
       locale = YAML.load_file(locale_file)
       locale['en'] ||= {}
-      
+
       total_calls = 0
       total_errors = 0
       JSON.parse(result).each do |k,v|
@@ -56,7 +56,7 @@ class App
         key = k.sub(options['templates-path'],'')
                .sub(/^\//,'')
                .sub(/(\.html)?\.erb/,'').split('/')
-  
+
         tmp = locale['en']
         key.each do |part|
           tmp[part] ||= {}
