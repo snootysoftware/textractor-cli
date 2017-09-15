@@ -5,7 +5,6 @@ require 'methadone'
 require 'textractor/cli.rb'
 require 'rest-client'
 require 'json'
-require 'pry'
 
 class App
   include Methadone::Main
