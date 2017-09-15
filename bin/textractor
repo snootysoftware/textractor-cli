@@ -33,7 +33,7 @@ class App
 
     puts "Processing..."
     headers = {
-      'X-Auth-Token' => options['license-key']
+      'X-Auth-Token' => key
     }
     result = RestClient.post(url, payload.to_json, headers)
 
