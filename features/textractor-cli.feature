@@ -12,7 +12,7 @@ Feature: Textractor CLI
 
 
   Scenario: App just runs
-    When I get help for "textractor-cli"
+    When I get help for "textractor"
     Then the exit status should be 0
     And the banner should be present
     And the banner should document that this app takes options
@@ -41,23 +41,23 @@ Feature: Textractor CLI
     And the endpoint "/textract" returns this content:
     """json
     {
-      "app/views/foo/index.html.erb": { 
+      "app/views/foo/index.html.erb": {
         "result": "t('.hello_world')",
-        "textract_calls": 1, 
-        "locale": { "hello_world": "Hello World" } 
+        "textract_calls": 1,
+        "locale": { "hello_world": "Hello World" }
       },
-      "app/views/foo/show.html.erb": { 
+      "app/views/foo/show.html.erb": {
         "result": "t('.hello_foo')",
-        "textract_calls": 1, 
+        "textract_calls": 1,
         "locale": { "hello_foo": "Hello Foo" }
       }
     }
     """
-    And I run `textractor-cli`
+    And I run `textractor`
     Then the output should contain:
     """
     Processing...
-    
+
     Processed 2 templates in total.
     Total errors: 0
     Total amount of string literals prepared for translation: 2
@@ -113,23 +113,23 @@ Feature: Textractor CLI
     And the endpoint "/textract" returns this content:
     """json
     {
-      "app/views/foo/index.html.erb": { 
-       "error": "Oops, unable to infer a valid HTML5 structure. Please contact us at info@snootysoftware.com" 
+      "app/views/foo/index.html.erb": {
+       "error": "Oops, unable to infer a valid HTML5 structure. Please contact us at info@snootysoftware.com"
       },
-      "app/views/foo/show.html.erb": { 
-        "result": "t('.hello_foo')", 
-        "textract_calls": 1, 
+      "app/views/foo/show.html.erb": {
+        "result": "t('.hello_foo')",
+        "textract_calls": 1,
         "locale": { "hello_foo": "Hello Foo" }
       }
     }
     """
-    And I run `textractor-cli`
+    And I run `textractor`
     Then the output should contain:
     """
     Processing...
-    
+
      Error processing "app/views/foo/index.html.erb": Oops, unable to infer a valid HTML5 structure. Please contact us at info@snootysoftware.com
-    
+
     Processed 2 templates in total.
     Total errors: 1
     Total amount of string literals prepared for translation: 1
@@ -190,7 +190,7 @@ Feature: Textractor CLI
         "credits_after_textract": 998
       }
       """
-      And I run `textractor-cli --dry-run`
+      And I run `textractor --dry-run`
       Then the output should contain:
       """
       Amount of templates to be processed: 2
@@ -240,14 +240,14 @@ Feature: Textractor CLI
     And the endpoint "/textract" returns this content:
     """json
     {
-      "app/views/foo/index.html.erb": { 
-        "result": "t('foo.index.hello_world')", 
-        "textract_calls": 1, 
-        "locale": { "hello_world": "Hello World" } 
+      "app/views/foo/index.html.erb": {
+        "result": "t('foo.index.hello_world')",
+        "textract_calls": 1,
+        "locale": { "hello_world": "Hello World" }
       }
     }
     """
-    And I run `textractor-cli --absolute-keys`
+    And I run `textractor --absolute-keys`
     #Then the output should contain "sdf"
     And the stderr should not contain anything
     Then the following request body should have been sent:
@@ -287,16 +287,16 @@ Feature: Textractor CLI
     And the endpoint "/textract" returns this content:
     """json
     {
-      "views/index.erb": { 
+      "views/index.erb": {
         "result": "t('.hello_world')",
-        "textract_calls": 1, 
-        "locale": { "hello_world": "Hello World" } 
+        "textract_calls": 1,
+        "locale": { "hello_world": "Hello World" }
       }
     }
     """
-    And I run `textractor-cli --templates-path views --template-pattern **/*.erb --locale locales/en.yml`
+    And I run `textractor --templates-path views --template-pattern **/*.erb --locale locales/en.yml`
     # Then the output should contain "sdf"
-    And the stderr should not contain anything 
+    And the stderr should not contain anything
     Then the following request body should have been sent:
     """json
     {
