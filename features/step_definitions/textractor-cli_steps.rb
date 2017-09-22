@@ -4,7 +4,8 @@ Given(/^pry$/) do
 end
 
 Given(/^the endpoint "([^"]*)" returns this content:$/) do |path, input|
-  RubyMock.resources[path] = input
+  inputhash = JSON.parse(input)
+  RubyMock.resources[path + '/' + inputhash.keys.first] = input
 end
 
 Then(/^the following request body should have been sent:$/) do |string|

@@ -45,7 +45,12 @@ Feature: Textractor CLI
         "result": "t('.hello_world')",
         "textract_calls": 1,
         "locale": { "hello_world": "Hello World" }
-      },
+      }
+    }
+    """
+    And the endpoint "/textract" returns this content:
+    """json
+    {
       "app/views/foo/show.html.erb": {
         "result": "t('.hello_foo')",
         "textract_calls": 1,
@@ -66,8 +71,15 @@ Feature: Textractor CLI
     Then the following request body should have been sent:
     """json
     {
-      "templates": {
+      "template": {
         "app/views/foo/index.html.erb": {"content": "Hello World"},
+      }
+    }
+    """
+    Then the following request body should have been sent:
+    """json
+    {
+      "template": {
         "app/views/foo/show.html.erb": {"content": "Hello Foo"}
       }
     }
@@ -115,7 +127,12 @@ Feature: Textractor CLI
     {
       "app/views/foo/index.html.erb": {
        "error": "Oops, unable to infer a valid HTML5 structure. Please contact us at info@snootysoftware.com"
-      },
+      }
+    }
+    """
+    And the endpoint "/textract" returns this content:
+    """json
+    {
       "app/views/foo/show.html.erb": {
         "result": "t('.hello_foo')",
         "textract_calls": 1,
@@ -138,8 +155,15 @@ Feature: Textractor CLI
     Then the following request body should have been sent:
     """json
     {
-      "templates": {
+      "template": {
         "app/views/foo/index.html.erb": {"content": "<h1><h1><h1><h1>Hello World"},
+      }
+    }
+    """
+    Then the following request body should have been sent:
+    """json
+    {
+      "template": {
         "app/views/foo/show.html.erb": {"content": "Hello Foo"}
       }
     }
@@ -203,8 +227,15 @@ Feature: Textractor CLI
       Then the following request body should have been sent:
       """json
       {
-        "templates": {
+        "template: {
           "app/views/foo/index.html.erb": {"content": "Hello World"},
+        }
+      }
+      """
+      Then the following request body should have been sent:
+      """json
+      {
+        "template": {
           "app/views/foo/show.html.erb": {"content": "Hello Foo"}
         }
       }
@@ -253,7 +284,7 @@ Feature: Textractor CLI
     Then the following request body should have been sent:
     """json
     {
-      "templates": {
+      "template": {
         "app/views/foo/index.html.erb": {"content": "Hello World"}
       },
       "absolute_keys": true
@@ -300,7 +331,7 @@ Feature: Textractor CLI
     Then the following request body should have been sent:
     """json
     {
-      "templates": {
+      "template": {
         "views/index.erb": {"content": "Hello World"}
       }
     }

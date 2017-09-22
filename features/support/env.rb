@@ -40,7 +40,8 @@ class RubyMock
     server = WEBrick::HTTPServer.new(Port: 8000, AccessLog: [], Logger: WEBrick::Log::new("/dev/null", 7))
     server.mount_proc '/' do |req, res|
       @requests << req.body
-      res.body = @resources[req.path]
+      templatekey= JSON.parse(req.body)['template'].keys.first
+      res.body = @resources[req.path + '/' + templatekey]
     end
     Thread.new do
       server.start
