@@ -1,36 +1,71 @@
-# Textractor::Cli
+## Textractor CLI
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/textractor/cli`. To experiment with that code, run `bin/console` for an interactive prompt.
+Command-line client for the Textractor service that automatically prepares ERB templates for internationalization. See https://textractor.snootysoftware.com for more information.
 
-TODO: Delete this and the text above, and describe your gem
+### Step 1. Install our open source client
 
-## Installation
+It's as simple as running:
 
-Add this line to your application's Gemfile:
+`gem install textractor-cli`
 
-```ruby
-gem 'textractor-cli'
+### Step 2. Configure your license key
+
+Create a file `.textractor.rc` in your home directory, with the following content:
+
+```
+  ---
+  license-key: foo
+    
 ```
 
-And then execute:
+Replace "foo" with your license key.
 
-    $ bundle
+### Step 3. Extract string literals!
 
-Or install it yourself as:
+To extract literals, run the following in your Rails project root:
 
-    $ gem install textractor-cli
+`textractor`
 
-## Usage
+This will convert your files to their translation-ready versions and add the original strings to your locale/en.yml file. To be safe, make sure to commit them to version control first.
 
-TODO: Write usage instructions here
+By default, textractor will create Rails-compatible `t('.foo')` calls and add the string literals using the Rails standard structure. You can override these settings using command-line arguments. Scroll down for more information.
 
-## Development
+### Example
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```
+      $ cd myrailsproject
+      $ cat app/views/foo/index.html.erb
+      Hello World
 
-## Contributing
+      $ cat config/locales/en.yml
+      ---
+      en:
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/textractor-cli.
+      $ textractor
+      Processing...
 
+      Processed 1 templates in total.
+      Total errors: 0
+      Total amount of string literals prepared for translation: 1
+
+      $ cat app/views/foo/index.html.erb
+      t('.hello_world')
+
+      $ cat config/locales/en.yml
+      ---
+      en:
+        foo:
+          index:
+            hello_world: Hello World
+```
+
+### More options
+
+`textractor --dry-run` can be used to find out how many credits your project requires.
+
+`textractor --template-pattern` can be used to set the Dir.glob which determines which ERB files will be processed. Our default pattern is made for Rails projects: `app/views/**/*.html.erb`
+
+`textractor --locale-path` determines which locale file will be updated with the original strings. The default is the English language for Rails: `config/locales/en.yml`
+
+`textractor --absolute-keys` forces the keys in `t()` calls to be absolute: `t('foo.index.hello_world')` instead of `t('.hello_world')`
