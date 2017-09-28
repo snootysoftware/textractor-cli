@@ -5,6 +5,7 @@ end
 
 Given(/^the endpoint "([^"]*)" returns this content:$/) do |path, input|
   inputhash = JSON.parse(input)
+  RubyMock.resources[path] = input
   RubyMock.resources[path + '/' + inputhash.keys.first] = input
 end
 

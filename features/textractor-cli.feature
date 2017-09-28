@@ -71,17 +71,15 @@ Feature: Textractor CLI
     Then the following request body should have been sent:
     """json
     {
-      "template": {
-        "app/views/foo/index.html.erb": {"content": "Hello World"},
-      }
+      "template": "Hello World",
+      "name": "app/views/foo/index.html.erb"
     }
     """
     Then the following request body should have been sent:
     """json
     {
-      "template": {
-        "app/views/foo/show.html.erb": {"content": "Hello Foo"}
-      }
+      "template": "Hello Foo",
+      "name": "app/views/foo/show.html.erb"
     }
     """
     Then the file "app/views/foo/index.html.erb" should contain:
@@ -155,17 +153,15 @@ Feature: Textractor CLI
     Then the following request body should have been sent:
     """json
     {
-      "template": {
-        "app/views/foo/index.html.erb": {"content": "<h1><h1><h1><h1>Hello World"},
-      }
+      "template": "<h1><h1><h1><h1>Hello World",
+      "name": "app/views/foo/index.html.erb"
     }
     """
     Then the following request body should have been sent:
     """json
     {
-      "template": {
-        "app/views/foo/show.html.erb": {"content": "Hello Foo"}
-      }
+      "template": "Hello Foo",
+      "name": "app/views/foo/show.html.erb"
     }
     """
     Then the file "app/views/foo/index.html.erb" should contain:
@@ -208,10 +204,8 @@ Feature: Textractor CLI
       And the endpoint "/quote" returns this content:
       """json
       {
-        "textract_calls": 2,
-        "current_credits": 1000,
-        "credits_cost": 2,
-        "credits_after_textract": 998
+        "textract_calls": 1,
+        "current_credits": 1000
       }
       """
       And I run `textractor --dry-run`
@@ -219,7 +213,6 @@ Feature: Textractor CLI
       """
       Amount of templates to be processed: 2
       Amount of t() calls: 2
-      Amount of credits this will cost: 2
       Current credits: 1000
       Credits after textract: 998
       """
@@ -227,17 +220,15 @@ Feature: Textractor CLI
       Then the following request body should have been sent:
       """json
       {
-        "template: {
-          "app/views/foo/index.html.erb": {"content": "Hello World"},
-        }
+        "template": "Hello World",
+        "name": "app/views/foo/index.html.erb"
       }
       """
       Then the following request body should have been sent:
       """json
       {
-        "template": {
-          "app/views/foo/show.html.erb": {"content": "Hello Foo"}
-        }
+        "template": "Hello Foo",
+        "name": "app/views/foo/show.html.erb"
       }
       """
       Then the file "app/views/foo/index.html.erb" should contain:
@@ -284,9 +275,8 @@ Feature: Textractor CLI
     Then the following request body should have been sent:
     """json
     {
-      "template": {
-        "app/views/foo/index.html.erb": {"content": "Hello World"}
-      },
+      "template": "Hello World",
+      "name": "app/views/foo/index.html.erb",
       "absolute_keys": true
     }
     """
@@ -331,9 +321,8 @@ Feature: Textractor CLI
     Then the following request body should have been sent:
     """json
     {
-      "template": {
-        "views/index.erb": {"content": "Hello World"}
-      }
+      "template": "Hello World",
+      "name": "views/index.erb"
     }
     """
     Then the file "views/index.erb" should contain:

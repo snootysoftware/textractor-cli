@@ -19,39 +19,49 @@ class App
     payload = {}
     glob = File.join(options['templates-path'], options['templates-pattern'])
 
-    Dir[glob].each do |f|
-      payload[f] = {content: File.read(f)}
-    end
-
-    payload = { template: payload }
-    payload[:absolute_keys] = true if options['absolute-keys']
-
     key = options['license-key'] || ENV['TEXTRACTOR_API_KEY']
     unless key
       exit_now!(1,"No license key found. Use --licence-key flag, ~/.textractor.rc or TEXTRACTOR_API_KEY environment variable. Visit https://textractor.snootysoftware.com to order one.")
     end
 
-    puts "Processing..."
     headers = {
       'X-Auth-Token' => key
     }
-    result = RestClient.post(url, payload.to_json, headers)
+
+    result = {}
+    result["textract_calls"] = 0 if options['dry-run']
+    Dir[glob].each do |f|
+      puts "Processing #{f}..."
+      payload = {}
+      payload["name"] = f
+      payload["template"] = File.read(f)
+      payload[:absolute_keys] = true if options['absolute-keys']
+      response = RestClient.post(url, payload.to_json, headers)
+      response = JSON.parse(response)
+      if options['dry-run']
+        result["current_credits"] = response['current_credits']
+        result["textract_calls"] += response['textract_calls']
+      else
+        response.each do |k,v|
+          result[k] = v
+        end
+      end
+    end
 
     if options['dry-run']
-      result = JSON.parse(result.body)
       puts "Amount of templates to be processed: #{Dir[glob].size}"
       puts "Amount of t() calls: #{result["textract_calls"]}"
-      puts "Amount of credits this will cost: #{result["credits_cost"]}"
       puts "Current credits: #{result["current_credits"]}"
-      puts "Credits after textract: #{result["credits_after_textract"]}"
+      credits_after_textract = result["current_credits"] - result["textract_calls"]
+      puts "Credits after textract: #{credits_after_textract}"
     else
       locale = YAML.load_file(locale_file)
       locale['en'] ||= {}
 
       total_calls = 0
       total_errors = 0
-      JSON.parse(result.body).each do |k,v|
-        raise "unexpected path \"#{k} in result!" unless payload[:template].keys.include?(k)
+      result.each do |k,v|
+        raise "unexpected path \"#{k}\" in result!" unless Dir[glob].include?(k)
         File.write(k, v["result"]) unless v["error"]
         key = k.sub(options['templates-path'],'')
                .sub(/^\//,'')
