@@ -61,7 +61,8 @@ Feature: Textractor CLI
     And I run `textractor`
     Then the output should contain:
     """
-    Processing...
+    Processing app/views/foo/index.html.erb...
+    Processing app/views/foo/show.html.erb...
 
     Processed 2 templates in total.
     Total errors: 0
@@ -141,7 +142,8 @@ Feature: Textractor CLI
     And I run `textractor`
     Then the output should contain:
     """
-    Processing...
+    Processing app/views/foo/index.html.erb...
+    Processing app/views/foo/show.html.erb...
 
      Error processing "app/views/foo/index.html.erb": Oops, unable to infer a valid HTML5 structure. Please contact us at info@snootysoftware.com
 
