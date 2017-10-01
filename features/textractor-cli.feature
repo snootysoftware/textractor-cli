@@ -251,6 +251,39 @@ Feature: Textractor CLI
               foo: Foo
       """
 
+    Scenario: Dry run without license key
+      Given a file named "app/views/foo/index.html.erb" with:
+      """
+      Hello World
+      """
+      When I remove the file ".textractor.rc"
+      And a file named "app/views/foo/show.html.erb" with:
+      """
+      Hello Foo
+      """
+      And a file named "config/locales/en.yml" with:
+      """
+      ---
+        en:
+          bar: foo
+          foo:
+            index:
+              foo: Foo
+      """
+      And the endpoint "/quote" returns this content:
+      """json
+      {
+        "textract_calls": 1
+      }
+      """
+      And I run `textractor --dry-run`
+      Then the output should contain:
+      """
+      Amount of templates to be processed: 2
+      Amount of t() calls: 2
+      """
+      And the stderr should not contain anything
+
   Scenario: use absolute translation keys
     Given a file named "app/views/foo/index.html.erb" with:
     """

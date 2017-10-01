@@ -20,7 +20,7 @@ class App
     glob = File.join(options['templates-path'], options['templates-pattern'])
 
     key = options['license-key'] || ENV['TEXTRACTOR_API_KEY']
-    unless key
+    if !key && !options['dry-run']
       exit_now!(1,"No license key found. Use --licence-key flag, ~/.textractor.rc or TEXTRACTOR_API_KEY environment variable. Visit https://textractor.snootysoftware.com to order one.")
     end
 
@@ -51,9 +51,11 @@ class App
     if options['dry-run']
       puts "Amount of templates to be processed: #{Dir[glob].size}"
       puts "Amount of t() calls: #{result["textract_calls"]}"
-      puts "Current credits: #{result["current_credits"]}"
-      credits_after_textract = result["current_credits"] - result["textract_calls"]
-      puts "Credits after textract: #{credits_after_textract}"
+      if result['current_credits']
+        puts "Current credits: #{result["current_credits"]}"
+        credits_after_textract = result["current_credits"] - result["textract_calls"]
+        puts "Credits after textract: #{credits_after_textract}"
+      end
     else
       locale = YAML.load_file(locale_file)
       locale['en'] ||= {}
