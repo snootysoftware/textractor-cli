@@ -36,7 +36,17 @@ class App
       payload["name"] = f
       payload["template"] = File.read(f)
       payload[:absolute_keys] = true if options['absolute-keys']
-      response = RestClient.post(url, payload.to_json, headers)
+      begin
+        response = RestClient.post(url, payload.to_json, headers)
+      rescue
+        @retries ||= 0
+        if @retries < 3
+          @retries += 1
+          retry
+        else
+          raise $!
+        end
+      end
       response = JSON.parse(response)
       if options['dry-run']
         result["current_credits"] = response['current_credits']
