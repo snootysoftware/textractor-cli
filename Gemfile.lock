@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    textractor-cli (0.1.1)
+    textractor-cli (0.1.2)
       methadone (~> 1.9.5)
       rest-client
 
@@ -87,4 +87,4 @@ DEPENDENCIES
   textractor-cli!
 
 BUNDLED WITH
-   1.14.6
+   1.15.4
