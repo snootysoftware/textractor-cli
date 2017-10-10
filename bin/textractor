@@ -42,6 +42,7 @@ class App
         @retries ||= 0
         if @retries < 3
           @retries += 1
+          sleep(3 * retries)
           retry
         else
           raise $!
